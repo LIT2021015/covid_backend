@@ -19,7 +19,7 @@ app.add_middleware(
 )
 
 
-MODEL_URL = "https://kitish-whatsapp-bot-media.s3.ap-south-1.amazonaws.com/documentMessage_1746721456066.bin"  # Replace with actual URL
+MODEL_URL = "https://kitish-whatsapp-bot-media.s3.ap-south-1.amazonaws.com/documentMessage_1746721456066.bin"  
 MODEL_PATH = "covid.h5"
 
 if not os.path.exists(MODEL_PATH):
