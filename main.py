@@ -10,7 +10,6 @@ import requests
 
 app = FastAPI()
 
-# Allow frontend to access backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -19,11 +18,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# S3 model download URL
+
 MODEL_URL = "https://kitish-whatsapp-bot-media.s3.ap-south-1.amazonaws.com/documentMessage_1746721456066.bin"  # Replace with actual URL
 MODEL_PATH = "covid.h5"
 
-# Download model if not present
 if not os.path.exists(MODEL_PATH):
     print("Downloading model from S3...")
     r = requests.get(MODEL_URL)
@@ -31,27 +29,24 @@ if not os.path.exists(MODEL_PATH):
         f.write(r.content)
     print("Model downloaded.")
 
-# Load the trained model
 model = load_model(MODEL_PATH)
 print("Model loaded.")
 
-# Image preprocessing function
 def preprocess(img_data):
     img = Image.open(io.BytesIO(img_data)).convert("RGB")
-    img = img.resize((224, 224))  # Match model input size
-    img_array = np.array(img) / 255.0  # Normalize pixel values
-    img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
+    img = img.resize((224, 224))  
+    img_array = np.array(img) / 255.0  
+    img_array = np.expand_dims(img_array, axis=0) 
     return img_array
 
-# Prediction endpoint
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     contents = await file.read()
     img_array = preprocess(contents)
 
-    prediction = model.predict(img_array)[0][0]  # Extract scalar from array
-    predicted_class = int(prediction >= 0.5)     # Apply threshold
-    confidence = float(prediction)               # Raw sigmoid output
+    prediction = model.predict(img_array)[0][0]  
+    predicted_class = int(prediction >= 0.5)     
+    confidence = float(prediction)               
 
     return {
         "class": predicted_class,
